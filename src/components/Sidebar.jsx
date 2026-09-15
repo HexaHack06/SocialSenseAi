@@ -1,8 +1,8 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+﻿import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   LayoutDashboard, MessageCircle, TrendingUp, Users,
-  Share2, Bell, FileText, Settings, Menu, X
+  Share2, Bell, FileText, Settings, X
 } from 'lucide-react';
 
 const navItems = [
@@ -16,7 +16,6 @@ const navItems = [
   { path: '/settings',  label: 'Settings',  Icon: Settings },
 ];
 
-// Bottom nav shows only the 5 most important items on mobile
 const mobileNavItems = [
   { path: '/overview',  label: 'Overview',  Icon: LayoutDashboard },
   { path: '/sentiment', label: 'Sentiment', Icon: MessageCircle },
@@ -25,61 +24,29 @@ const mobileNavItems = [
   { path: '/settings',  label: 'Settings',  Icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close sidebar when route changes on mobile
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
-  // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+  }, [sidebarOpen]);
 
   const handleNav = (path) => {
     navigate(path);
-    setMobileOpen(false);
+    setSidebarOpen(false);
   };
 
   return (
     <>
-      {/* ── Mobile top bar ─────────────────────────── */}
-      <div className="mobile-topbar">
-        <button
-          className="hamburger-btn"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Open navigation"
-        >
-          <Menu size={22} />
-        </button>
-        <div className="logo-mark">
-          <div className="logo-icon" style={{ width: 30, height: 30, fontSize: 14 }}>SS</div>
-          <div className="logo-text">
-            <h2 style={{ fontSize: 12 }}>SocialSense AI</h2>
-          </div>
-        </div>
-        <div style={{ width: 38 }} /> {/* spacer for centering */}
-      </div>
-
-      {/* ── Overlay backdrop ───────────────────────── */}
-      {mobileOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={() => setMobileOpen(false)}
-        />
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* ── Sidebar ────────────────────────────────── */}
-      <aside className={`sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="logo-mark">
             <div className="logo-icon">SS</div>
@@ -88,10 +55,9 @@ export default function Sidebar() {
               <span>Social Intelligence Platform</span>
             </div>
           </div>
-          {/* Close button (mobile only) */}
           <button
             className="sidebar-close-btn"
-            onClick={() => setMobileOpen(false)}
+            onClick={() => setSidebarOpen(false)}
             aria-label="Close navigation"
           >
             <X size={18} />
@@ -136,7 +102,6 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* ── Mobile bottom nav ──────────────────────── */}
       <nav className="mobile-bottom-nav">
         {mobileNavItems.map(({ path, label, Icon }) => (
           <button
