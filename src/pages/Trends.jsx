@@ -202,7 +202,7 @@ export default function Trends() {
 
           <div className="card-body" style={{ paddingTop: 8 }}>
             {/* Terminal / Code-styled Chronological Propagation Container */}
-            <div style={{
+            <div className="trend-origin-terminal" style={{
               background: '#090d16',
               borderRadius: 'var(--radius-md)',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -222,7 +222,7 @@ export default function Trends() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {originSteps.map((step, idx) => (
                   <div key={idx}>
-                    <div style={{
+                    <div className="trend-origin-row" style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',

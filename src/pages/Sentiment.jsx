@@ -89,7 +89,7 @@ export default function Sentiment() {
             <div className="card-header">
               <div className="card-title">Sentiment Distribution</div>
             </div>
-            <div className="card-body" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div className="card-body sentiment-dist-body" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
               <ResponsiveContainer width={180} height={180}>
                 <PieChart>
                   <Pie data={sentDist} innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">

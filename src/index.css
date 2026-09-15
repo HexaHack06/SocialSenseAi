@@ -1413,3 +1413,76 @@ input, select { font-family: inherit; }
   .mobile-topbar { padding: 10px 12px; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE-SPECIFIC MOBILE FIXES
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Alerts — 4-col inline grid to 2-col */
+  .alerts-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Sentiment — pie + bars flex row to column stack */
+  .sentiment-dist-body {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .sentiment-dist-body > .recharts-responsive-container {
+    width: 100% !important;
+  }
+
+  /* Trends — origin terminal: reduce padding */
+  .trend-origin-terminal {
+    padding: 14px 12px !important;
+  }
+  /* Trends — each origin row: stack platform badge below */
+  .trend-origin-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  /* Reports grid 3-col to 2-col */
+  .report-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .report-preview {
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+  }
+  .report-section {
+    overflow-x: auto;
+  }
+
+  /* Alert header: stop wrapping weirdly */
+  .alert-header {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* Card headers with pill rows: allow wrapping */
+  .card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Filter buttons: wrap and fill */
+  .filter-row {
+    flex-wrap: wrap;
+  }
+  .filter-row .btn {
+    flex: 1;
+    min-width: 58px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Network canvas min height */
+  .network-canvas { min-height: 260px; }
+
+  /* recharts: never overflow parent */
+  .recharts-wrapper { max-width: 100% !important; }
+}

@@ -94,7 +94,7 @@ export default function Alerts() {
 
       <div className="page-body">
         {/* Summary stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
+        <div className="alerts-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
           {[
             { label: 'Total Alerts', value: alerts.length, color: '#6366f1', icon: '' },
             { label: 'High Severity', value: alerts.filter(a => a.severity === 'high').length, color: '#ef4444', icon: '' },
