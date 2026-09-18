@@ -89,16 +89,18 @@ export default function Sentiment() {
             <div className="card-header">
               <div className="card-title">Sentiment Distribution</div>
             </div>
-            <div className="card-body sentiment-dist-body" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-              <ResponsiveContainer width={180} height={180}>
-                <PieChart>
-                  <Pie data={sentDist} innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                    {sentDist.map((s, i) => <Cell key={i} fill={s.color} />)}
-                  </Pie>
-                  <Tooltip formatter={v => `${v}%`} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ flex: 1 }}>
+            <div className="card-body sentiment-dist-body" style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ flexShrink: 0, width: 180, minWidth: 140 }}>
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie data={sentDist} innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                      {sentDist.map((s, i) => <Cell key={i} fill={s.color} />)}
+                    </Pie>
+                    <Tooltip formatter={v => `${v}%`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ flex: 1, minWidth: 160 }}>
                 {sentDist.map((s, i) => (
                   <div key={i} style={{ marginBottom: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>

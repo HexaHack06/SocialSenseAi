@@ -16,13 +16,15 @@ export default function Settings() {
           <h1>Settings</h1>
           <p>Configure your SocialSense AI workspace</p>
         </div>
-        <button className="btn btn-primary" onClick={() => alert('Settings saved successfully!')}>
-          Save Changes
-        </button>
+        <div className="header-controls">
+          <button className="btn btn-primary" onClick={() => alert('Settings saved successfully!')}>
+            Save Changes
+          </button>
+        </div>
       </div>
 
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="dashboard-grid grid-2col">
 
           {/* Data Sources */}
           <div className="card">
@@ -147,7 +149,7 @@ export default function Settings() {
 
         {/* About */}
         <div className="card" style={{ marginTop: 24 }}>
-          <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div className="card-body settings-about-body" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             <div style={{ width: 56, height: 56, background: 'linear-gradient(135deg, #6366f1, #22d3ee)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
               SS
             </div>
@@ -160,7 +162,7 @@ export default function Settings() {
                 Version 1.0.0 · Demo Build · Smart India Hackathon 2026
               </div>
             </div>
-            <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+            <div className="settings-about-status" style={{ marginLeft: 'auto', textAlign: 'right' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 'var(--radius-full)' }}>
                 <div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: '#059669' }}>System Operational</span>

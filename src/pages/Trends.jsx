@@ -172,7 +172,7 @@ export default function Trends() {
 
         {/* ── 12. TREND ORIGIN SECTION ── */}
         <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(99,102,241,0.25)', background: 'linear-gradient(180deg, rgba(99,102,241,0.03) 0%, transparent 100%)' }}>
-          <div className="card-header">
+          <div className="card-header trend-origin-header" style={{ alignItems: 'flex-start' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div className="card-title" style={{ fontSize: 16, fontWeight: 800 }}>Trend Origin Analysis</div>

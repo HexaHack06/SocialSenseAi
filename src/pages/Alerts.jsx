@@ -80,7 +80,7 @@ export default function Alerts() {
           <h1>Alerts</h1>
           <p>AI-generated real-time intelligence alerts</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="header-controls">
           {unreadCount > 0 && (
             <div style={{
               background: '#ef4444', color: '#fff', borderRadius: 'var(--radius-full)',

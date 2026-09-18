@@ -216,7 +216,7 @@ export default function Network() {
       </div>
 
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+        <div className="dashboard-grid network-main-grid">
           {/* Network graph */}
           <div>
             <div className="card" style={{ marginBottom: 20 }}>

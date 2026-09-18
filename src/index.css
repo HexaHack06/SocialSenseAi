@@ -473,6 +473,7 @@ input, select { font-family: inherit; }
 .grid-3col { grid-template-columns: 1fr 1fr 1fr; }
 .grid-6040 { grid-template-columns: 1.5fr 1fr; }
 .grid-4060 { grid-template-columns: 1fr 1.5fr; }
+.network-main-grid { grid-template-columns: 1fr 340px; }
 
 .col-span-2 { grid-column: span 2; }
 .col-span-3 { grid-column: span 3; }
@@ -1137,6 +1138,7 @@ input, select { font-family: inherit; }
 @media (max-width: 1200px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2col, .grid-6040, .grid-4060 { grid-template-columns: 1fr; }
+  .network-main-grid { grid-template-columns: 1fr; }
   .col-span-2 { grid-column: span 1; }
   .grid-3col { grid-template-columns: repeat(2, 1fr); }
   .col-span-3 { grid-column: span 2; }
@@ -1401,6 +1403,37 @@ input, select { font-family: inherit; }
     flex: 1;
     min-width: 0;
   }
+  /* Network page: stack graph + panel to single column */
+  .network-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Settings About card: stack logo + text + status badge vertically */
+  .card-body.settings-about-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .settings-about-status {
+    margin-left: 0 !important;
+  }
+
+  /* Trends origin card header: let title and pills stack */
+  .trend-origin-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  /* Sentiment dist: stack chart on top of bars */
+  .sentiment-dist-body {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .sentiment-dist-body > div:first-child {
+    width: 100% !important;
+    min-width: unset !important;
+  }
 }
 
 /* ── Small mobile (≤ 400px) ─────────────────────────────────── */
@@ -1411,6 +1444,16 @@ input, select { font-family: inherit; }
   .page-body { padding: 12px; }
   .page-header { padding: 12px 12px 10px; top: 58px; }
   .mobile-topbar { padding: 10px 12px; }
+
+  /* Settings about card: wrap all children vertically */
+  .settings-about-body {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .settings-about-status {
+    margin-left: 0 !important;
+    width: 100%;
+  }
 }
 
 
