@@ -209,12 +209,12 @@ export default function Trends() {
               padding: '24px 28px',
               fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', animation: 'pulse 2s infinite' }} />
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', animation: 'pulse 2s infinite', flexShrink: 0 }} />
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#ffffff' }}>Chronological Origin Cascade · {activeOriginTag}</span>
                 </div>
-                <span style={{ fontSize: 11, color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 4 }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 4, whiteSpace: 'nowrap' }}>
                   Automated Pattern Extraction
                 </span>
               </div>
@@ -224,8 +224,10 @@ export default function Trends() {
                   <div key={idx}>
                     <div className="trend-origin-row" style={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: 8,
                       background: step.type === 'detected'
                         ? 'rgba(16,185,129,0.12)'
                         : step.type === 'influencer'
@@ -239,39 +241,43 @@ export default function Trends() {
                       borderRadius: 'var(--radius-sm)',
                       padding: '12px 16px',
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1, minWidth: 0 }}>
                         <span style={{
                           fontFamily: 'monospace',
                           fontSize: 13,
                           fontWeight: 700,
                           color: step.type === 'detected' ? '#10b981' : '#94a3b8',
-                          minWidth: 46
+                          minWidth: 46,
+                          flexShrink: 0,
+                          paddingTop: 1,
                         }}>
                           {step.time}
                         </span>
-                        <div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{
                             fontSize: 13,
                             fontWeight: step.type === 'detected' ? 800 : 600,
                             color: step.type === 'detected' ? '#10b981' : '#ffffff',
-                            letterSpacing: step.type === 'detected' ? '0.04em' : 'normal'
+                            letterSpacing: step.type === 'detected' ? '0.04em' : 'normal',
+                            wordBreak: 'break-word',
                           }}>
                             {step.step}
                           </div>
-                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
+                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 2, wordBreak: 'break-word', lineHeight: 1.5 }}>
                             {step.desc}
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                         <span style={{
                           fontSize: 11,
                           padding: '3px 8px',
                           borderRadius: 4,
                           background: 'rgba(255,255,255,0.06)',
                           color: '#cbd5e1',
-                          fontWeight: 500
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
                         }}>
                           {step.platform}
                         </span>

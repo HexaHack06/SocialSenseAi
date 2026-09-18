@@ -214,7 +214,7 @@ export default function Sentiment() {
           <div className="card-header">
             <div className="card-title">Social Media Posts</div>
           </div>
-          <div style={{ padding: '12px 22px 0' }}>
+          <div style={{ padding: '12px 16px 0' }}>
             <div className="filter-row">
               <div className="search-bar">
                 <span>Search</span>
@@ -238,7 +238,7 @@ export default function Sentiment() {
               </span>
             </div>
           </div>
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
             <table className="data-table">
               <thead>
                 <tr>

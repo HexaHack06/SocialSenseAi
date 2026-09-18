@@ -249,6 +249,9 @@ input, select { font-family: inherit; }
   display: flex;
   flex-direction: column;
   background: var(--surface-0);
+  /* Prevent any child from expanding beyond viewport width */
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* ── Page Header ────────────────────────────────────────────── */
@@ -351,6 +354,9 @@ input, select { font-family: inherit; }
 .page-body {
   padding: 28px 32px;
   flex: 1;
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Cards ──────────────────────────────────────────────────── */
@@ -1477,15 +1483,26 @@ input, select { font-family: inherit; }
     width: 100% !important;
   }
 
-  /* Trends — origin terminal: reduce padding */
+  /* Trends — origin terminal: reduce padding significantly */
   .trend-origin-terminal {
-    padding: 14px 12px !important;
+    padding: 12px 10px !important;
+    overflow-x: hidden;
   }
-  /* Trends — each origin row: stack platform badge below */
+  /* Trends — each origin row: already uses flexWrap in JSX, just ensure no overflow */
   .trend-origin-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 6px !important;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  /* Ensure every card body clips overflow */
+  .card-body {
+    overflow-x: hidden;
+  }
+
+  /* Sentiment filter area horizontal padding match card body */
+  .sentiment-filter-wrap {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   /* Reports grid 3-col to 2-col */
