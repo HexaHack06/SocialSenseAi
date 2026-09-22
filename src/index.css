@@ -304,6 +304,102 @@ input, select { font-family: inherit; }
 .select-control:hover { border-color: var(--brand-primary); }
 .select-control:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px var(--brand-glow); }
 
+/* ── Date Range Controls ───────────────────────────────────────── */
+.date-range-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  transition: all var(--transition);
+}
+
+.date-range-picker:hover {
+  border-color: var(--brand-primary);
+}
+
+.date-range-picker:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-glow);
+}
+
+.date-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.date-input {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition);
+}
+
+.date-input:hover {
+  background: var(--surface-1);
+  border-color: var(--border);
+}
+
+.date-input:focus {
+  background: var(--surface-1);
+  border-color: var(--brand-primary);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: opacity(0.7);
+  transition: filter var(--transition);
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  filter: opacity(1);
+}
+
+.date-separator {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.date-reset-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--brand-primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-left: 2px;
+}
+
+.date-reset-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--brand-primary);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1316,6 +1412,7 @@ input, select { font-family: inherit; }
   }
 
   .header-controls .select-control,
+  .header-controls .date-range-picker,
   .header-controls .btn {
     flex: 1;
     justify-content: center;

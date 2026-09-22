@@ -1,13 +1,25 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { useApp } from '../App';
 import {
-  getKpiData, getSentimentTimeline, getTrendingTopics, audienceData, influencers
+  audienceData, influencers
 } from '../data/mockData';
-import NetworkGraph from '../components/NetworkGraph';
+
+function formatDisplayDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr + 'T00:00:00');
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  } catch {
+    // fallback to original string
+  }
+  return dateStr;
+}
 
 // ── Analyze animation steps ───────────────────────────────────
 const STEPS = [
@@ -146,7 +158,7 @@ function TopicPanel({ topic, onClose }) {
         <div style={{ marginBottom: 18 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Related Keywords</div>
           <div className="keyword-cloud">
-            {topic.relatedKeywords.map(kw => (
+            {(topic.relatedKeywords || []).map(kw => (
               <span key={kw} className="keyword-tag keyword-positive">{kw}</span>
             ))}
           </div>
@@ -154,7 +166,7 @@ function TopicPanel({ topic, onClose }) {
 
         <div>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Recent Posts</div>
-          {topic.recentPosts.map((post, i) => (
+          {(topic.recentPosts || []).map((post, i) => (
             <div key={i} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: 8 }}>
               <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 8 }}>
                 "{post.text}"
@@ -173,14 +185,142 @@ function TopicPanel({ topic, onClose }) {
 
 // ── Overview Page ─────────────────────────────────────────────
 export default function Overview() {
-  const { platform, setPlatform, dateRange, setDateRange, analyzed, setAnalyzed } = useApp();
+  const { platform, setPlatform, setDateRange, setAnalyzed } = useApp();
+  const [startDate, setStartDate] = useState('2022-12-31');
+  const [endDate, setEndDate] = useState('2023-05-15');
+  const dateError = !startDate || !endDate
+    ? 'Please select both From and To dates.'
+    : startDate > endDate
+      ? 'From date cannot be after To date.'
+      : null;
+
   const [showAnalyze, setShowAnalyze] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedInfluencer, setSelectedInfluencer] = useState(influencers[0]);
 
-  const data = getKpiData(platform, dateRange);
-  const timelineData = getSentimentTimeline(platform, dateRange);
-  const currentTrending = getTrendingTopics(platform, dateRange);
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Sync date range in AppContext for consistency across views
+  useEffect(() => {
+    if (startDate && endDate && startDate <= endDate && setDateRange) {
+      setDateRange(`${formatDisplayDate(startDate)} – ${formatDisplayDate(endDate)}`);
+    }
+  }, [startDate, endDate, setDateRange]);
+
+  useEffect(() => {
+    if (!startDate || !endDate || startDate > endDate) {
+      return;
+    }
+
+    let isMounted = true;
+    const abortController = new AbortController();
+
+    const fetchOverview = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          platform: platform || 'all',
+          startDate,
+          endDate
+        });
+
+        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiBaseUrl}/api/overview?${params.toString()}`, {
+          signal: abortController.signal
+        });
+
+        if (!res.ok) {
+          throw new Error(`API returned status ${res.status}`);
+        }
+
+        const result = await res.json();
+        if (isMounted) {
+          if (result.success && result.data) {
+            setApiData(result.data);
+          } else {
+            throw new Error(result.message || 'Failed to fetch overview data');
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError' && isMounted) {
+          console.error('Failed to fetch overview data:', err);
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchOverview();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
+  }, [platform, startDate, endDate]);
+
+  const handleStartDateChange = (e) => setStartDate(e.target.value);
+  const handleEndDateChange = (e) => setEndDate(e.target.value);
+  const handleResetDates = () => {
+    setStartDate('2022-12-31');
+    setEndDate('2023-05-15');
+  };
+
+  const data = {
+    mentions: apiData?.kpis?.totalMentions ?? 0,
+    positive: apiData?.kpis?.positivePercentage ?? 0,
+    negative: apiData?.kpis?.negativePercentage ?? 0,
+    neutral: apiData?.kpis?.neutralPercentage ?? 0,
+    mentionsDelta: apiData?.kpis?.wow?.totalMentions ?? 0,
+    posDelta: apiData?.kpis?.wow?.positivePercentage ?? 0,
+    negDelta: apiData?.kpis?.wow?.negativePercentage ?? 0,
+    neuDelta: apiData?.kpis?.wow?.neutralPercentage ?? 0,
+  };
+
+  const timelineData = (apiData?.sentimentTimeline || []).map(item => {
+    let displayDate = item.date;
+    try {
+      const d = new Date(item.date);
+      if (!isNaN(d.getTime())) {
+        displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    } catch {
+      // fallback
+    }
+
+    const total = item.total || (item.positive + item.neutral + item.negative) || 0;
+    return {
+      date: displayDate,
+      positive: total > 0 ? Number(((item.positive / total) * 100).toFixed(1)) : item.positive,
+      neutral: total > 0 ? Number(((item.neutral / total) * 100).toFixed(1)) : item.neutral,
+      negative: total > 0 ? Number(((item.negative / total) * 100).toFixed(1)) : item.negative,
+      total: item.total
+    };
+  });
+
+  const currentTrending = (apiData?.topics || []).map((t, idx) => ({
+    id: t.topicId || idx,
+    tag: t.topicName?.startsWith('#') ? t.topicName : `#${t.topicName || t.topicId}`,
+    mentions: t.postCount || t.count || 0,
+    growth: '+0%',
+    status: 'Active',
+    sentiment: 'Neutral',
+    relatedKeywords: [],
+    recentPosts: (apiData?.recentPosts || [])
+      .filter(p => p.topicName === t.topicName || p.topicId === t.topicId)
+      .slice(0, 4)
+      .map(p => ({
+        text: p.text,
+        sentiment: p.sentiment ? p.sentiment.charAt(0).toUpperCase() + p.sentiment.slice(1) : 'Neutral',
+        platform: p.platform ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1) : 'Web',
+        time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'
+      }))
+  }));
 
   const avatarColors = ['#6366f1', '#3b82f6', '#22d3ee', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'];
 
@@ -211,16 +351,41 @@ export default function Overview() {
             <option value="instagram">Instagram</option>
             <option value="telegram">Telegram</option>
           </select>
-          <select
-            className="select-control"
-            value={dateRange}
-            onChange={e => setDateRange(e.target.value)}
-          >
-            <option value="May 12, 2026 – May 18, 2026">May 12 – May 18, 2026</option>
-            <option value="May 5, 2026 – May 11, 2026">May 5 – May 11, 2026</option>
-            <option value="Apr 28 – May 4, 2026">Apr 28 – May 4, 2026</option>
-            <option value="Last 30 Days">Last 30 Days</option>
-          </select>
+          <div className="date-range-picker">
+            <div className="date-field">
+              <label htmlFor="overview-from-date" className="date-label">From</label>
+              <input
+                id="overview-from-date"
+                type="date"
+                className="date-input"
+                value={startDate}
+                max={endDate || undefined}
+                onChange={handleStartDateChange}
+              />
+            </div>
+            <span className="date-separator">–</span>
+            <div className="date-field">
+              <label htmlFor="overview-to-date" className="date-label">To</label>
+              <input
+                id="overview-to-date"
+                type="date"
+                className="date-input"
+                value={endDate}
+                min={startDate || undefined}
+                onChange={handleEndDateChange}
+              />
+            </div>
+            {(startDate !== '2022-12-31' || endDate !== '2023-05-15') && (
+              <button
+                type="button"
+                className="date-reset-btn"
+                title="Reset to historical dataset range (2022-12-31 to 2023-05-15)"
+                onClick={handleResetDates}
+              >
+                Reset
+              </button>
+            )}
+          </div>
           <button className="btn btn-primary" onClick={() => setShowAnalyze(true)}>
             Analyze Data
           </button>
@@ -228,6 +393,54 @@ export default function Overview() {
       </div>
 
       <div className="page-body">
+        {dateError && (
+          <div style={{
+            padding: '10px 14px',
+            marginBottom: 16,
+            borderRadius: 'var(--radius-sm, 8px)',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#ef4444',
+            fontSize: 13,
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}>
+            <span>⚠️</span>
+            <span>{dateError}</span>
+          </div>
+        )}
+        {error && (
+          <div style={{
+            padding: '10px 14px',
+            marginBottom: 16,
+            borderRadius: 'var(--radius-sm, 6px)',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            color: '#ef4444',
+            fontSize: 13,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}>
+            <span>⚠️</span>
+            <span>Unable to load overview data from API: {error}</span>
+          </div>
+        )}
+        {loading && (
+          <div style={{
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            marginBottom: 8,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand-primary, #6366f1)' }}></span>
+            <span>Updating overview data...</span>
+          </div>
+        )}
         {/* KPI Cards */}
         <div className="kpi-grid">
           <KPICard type="mentions" label="Total Mentions" value={data.mentions} delta={data.mentionsDelta} />
@@ -241,7 +454,9 @@ export default function Overview() {
           <div className="card">
             <div className="card-header">
               <div className="card-title">Sentiment Over Time</div>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dateRange}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {startDate && endDate ? `${formatDisplayDate(startDate)} – ${formatDisplayDate(endDate)}` : ''}
+              </span>
             </div>
             <div className="card-body">
               <ResponsiveContainer width="100%" height={240}>
