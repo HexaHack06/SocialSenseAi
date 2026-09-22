@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../App';
+import { API_BASE_URL } from '../config/api';
 
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '';
@@ -113,13 +114,12 @@ export default function Alerts() {
       setLoading(true);
       setError(null);
       try {
-        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const params = new URLSearchParams({
           platform: platform || 'all',
           startDate,
           endDate,
         });
-        const res = await fetch(`${apiBaseUrl}/api/alerts?${params.toString()}`, {
+        const res = await fetch(`${API_BASE_URL}/api/alerts?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {

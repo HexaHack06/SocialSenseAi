@@ -5,6 +5,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import { useApp } from '../App';
+import { API_BASE_URL } from '../config/api';
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -82,13 +83,12 @@ export default function Sentiment() {
       setLoading(true);
       setError(null);
       try {
-        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const params = new URLSearchParams({
           platform: platform || 'all',
           startDate,
           endDate,
         });
-        const res = await fetch(`${apiBaseUrl}/api/overview?${params}`, {
+        const res = await fetch(`${API_BASE_URL}/api/sentiment?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) throw new Error(`API returned status ${res.status}`);
