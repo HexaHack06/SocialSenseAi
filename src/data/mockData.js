@@ -217,33 +217,33 @@ export function getSentimentTimeline(platform = 'all', dateRange = 'May 12, 2026
 export const multiRangeTrending = {
   range1: [
     {
-      id: 1, tag: '#Election2026', mentions: 12400, growth: '+42%', status: 'Rising',
+      id: 1, tag: '#Politics', mentions: 12400, growth: '+42%', status: 'Rising',
       sentiment: 'Mixed', relatedKeywords: ['voting', 'democracy', 'candidates', 'polls', 'results'],
       recentPosts: [
-        { text: 'Democracy speaks today! Excited to see #Election2026 results unfold.', sentiment: 'Positive', platform: 'Twitter', time: '2 min ago' },
+        { text: 'Democracy speaks today! Excited to see #Politics results unfold.', sentiment: 'Positive', platform: 'Twitter', time: '2 min ago' },
         { text: 'Behind-the-scenes Reel of the election booth coverage went viral!', sentiment: 'Positive', platform: 'Instagram', time: '4 min ago' },
-        { text: 'Concerned about the voting irregularities in #Election2026.', sentiment: 'Negative', platform: 'Twitter', time: '5 min ago' },
-        { text: 'Historic turnout expected in #Election2026 across all districts.', sentiment: 'Neutral', platform: 'Telegram', time: '8 min ago' },
+        { text: 'Concerned about the voting irregularities in #Politics.', sentiment: 'Negative', platform: 'Twitter', time: '5 min ago' },
+        { text: 'Historic turnout expected in #Politics across all districts.', sentiment: 'Neutral', platform: 'Telegram', time: '8 min ago' },
       ]
     },
     {
-      id: 2, tag: '#DigitalIndia', mentions: 8700, growth: '+28%', status: 'Rising',
+      id: 2, tag: '#Business', mentions: 8700, growth: '+28%', status: 'Rising',
       sentiment: 'Positive', relatedKeywords: ['tech', 'innovation', 'internet', 'government', 'startup'],
       recentPosts: [
-        { text: '#DigitalIndia initiative is transforming rural connectivity.', sentiment: 'Positive', platform: 'Twitter', time: '3 min ago' },
+        { text: '#Business initiative is transforming rural connectivity.', sentiment: 'Positive', platform: 'Twitter', time: '3 min ago' },
         { text: 'Infographic carousel on digital payments adoption reaching record saves.', sentiment: 'Positive', platform: 'Instagram', time: '6 min ago' },
-        { text: 'Great progress under #DigitalIndia but more work needed.', sentiment: 'Neutral', platform: 'Telegram', time: '7 min ago' },
-        { text: 'New digital literacy programs launched under #DigitalIndia.', sentiment: 'Positive', platform: 'Twitter', time: '12 min ago' },
+        { text: 'Great progress under #Business but more work needed.', sentiment: 'Neutral', platform: 'Telegram', time: '7 min ago' },
+        { text: 'New digital literacy programs launched under #Business.', sentiment: 'Positive', platform: 'Twitter', time: '12 min ago' },
       ]
     },
     {
-      id: 3, tag: '#AIRevolution', mentions: 6200, growth: '+35%', status: 'Rising',
+      id: 3, tag: '#Technology', mentions: 6200, growth: '+35%', status: 'Rising',
       sentiment: 'Positive', relatedKeywords: ['machine learning', 'GPT', 'automation', 'future', 'jobs'],
       recentPosts: [
-        { text: 'The #AIRevolution is changing every industry imaginable.', sentiment: 'Positive', platform: 'Twitter', time: '1 min ago' },
+        { text: 'The #Technology is changing every industry imaginable.', sentiment: 'Positive', platform: 'Twitter', time: '1 min ago' },
         { text: 'Creators showcasing mind-blowing AI video generation workflows.', sentiment: 'Positive', platform: 'Instagram', time: '3 min ago' },
-        { text: 'Is #AIRevolution creating or destroying jobs? Big debate!', sentiment: 'Negative', platform: 'Telegram', time: '6 min ago' },
-        { text: '#AIRevolution: India poised to lead the next wave.', sentiment: 'Positive', platform: 'Twitter', time: '10 min ago' },
+        { text: 'Is #Technology creating or destroying jobs? Big debate!', sentiment: 'Negative', platform: 'Telegram', time: '6 min ago' },
+        { text: '#Technology: India poised to lead the next wave.', sentiment: 'Positive', platform: 'Twitter', time: '10 min ago' },
       ]
     },
     {
@@ -276,10 +276,10 @@ export const multiRangeTrending = {
       ]
     },
     {
-      id: 2, tag: '#Election2026', mentions: 9800, growth: '+19%', status: 'Rising',
+      id: 2, tag: '#Politics', mentions: 9800, growth: '+19%', status: 'Rising',
       sentiment: 'Mixed', relatedKeywords: ['manifestos', 'rallies', 'campaigns', 'debates'],
       recentPosts: [
-        { text: 'Voter registration camps seeing massive queues ahead of #Election2026.', sentiment: 'Positive', platform: 'Twitter', time: '15 min ago' },
+        { text: 'Voter registration camps seeing massive queues ahead of #Politics.', sentiment: 'Positive', platform: 'Twitter', time: '15 min ago' },
         { text: 'First-time voters sharing their registration badges on Stories.', sentiment: 'Positive', platform: 'Instagram', time: '20 min ago' },
       ]
     },
@@ -292,10 +292,10 @@ export const multiRangeTrending = {
       ]
     },
     {
-      id: 4, tag: '#DigitalIndia', mentions: 6400, growth: '+12%', status: 'Stable',
+      id: 4, tag: '#Business', mentions: 6400, growth: '+12%', status: 'Stable',
       sentiment: 'Positive', relatedKeywords: ['broadband', 'fintech', 'UPI', 'citizens'],
       recentPosts: [
-        { text: 'UPI transaction volume hits new monthly peak #DigitalIndia.', sentiment: 'Positive', platform: 'Telegram', time: '2 hours ago' },
+        { text: 'UPI transaction volume hits new monthly peak #Business.', sentiment: 'Positive', platform: 'Telegram', time: '2 hours ago' },
       ]
     },
     {
@@ -322,17 +322,17 @@ export const multiRangeTrending = {
       ]
     },
     {
-      id: 3, tag: '#AIRevolution', mentions: 5800, growth: '+15%', status: 'Stable',
+      id: 3, tag: '#Technology', mentions: 5800, growth: '+15%', status: 'Stable',
       sentiment: 'Positive', relatedKeywords: ['models', 'compute', 'open-source', 'agents'],
       recentPosts: [
-        { text: 'Autonomous agents represent the next milestone in #AIRevolution.', sentiment: 'Positive', platform: 'Twitter', time: '2 hours ago' },
+        { text: 'Autonomous agents represent the next milestone in #Technology.', sentiment: 'Positive', platform: 'Twitter', time: '2 hours ago' },
       ]
     },
     {
-      id: 4, tag: '#Election2026', mentions: 5100, growth: '+8%', status: 'Stable',
+      id: 4, tag: '#Politics', mentions: 5100, growth: '+8%', status: 'Stable',
       sentiment: 'Neutral', relatedKeywords: ['schedules', 'dates', 'phases', 'security'],
       recentPosts: [
-        { text: 'Official phase schedule announced for #Election2026.', sentiment: 'Neutral', platform: 'Twitter', time: '3 hours ago' },
+        { text: 'Official phase schedule announced for #Politics.', sentiment: 'Neutral', platform: 'Twitter', time: '3 hours ago' },
       ]
     },
     {
@@ -345,24 +345,24 @@ export const multiRangeTrending = {
   ],
   range30: [
     {
-      id: 1, tag: '#Election2026', mentions: 48600, growth: '+64%', status: 'Rising',
+      id: 1, tag: '#Politics', mentions: 48600, growth: '+64%', status: 'Rising',
       sentiment: 'Mixed', relatedKeywords: ['voting', 'candidates', 'debates', 'democracy', 'polls'],
       recentPosts: [
-        { text: 'Record citizen participation seen throughout the month #Election2026.', sentiment: 'Positive', platform: 'Twitter', time: '5 min ago' },
+        { text: 'Record citizen participation seen throughout the month #Politics.', sentiment: 'Positive', platform: 'Twitter', time: '5 min ago' },
       ]
     },
     {
-      id: 2, tag: '#DigitalIndia', mentions: 34200, growth: '+31%', status: 'Rising',
+      id: 2, tag: '#Business', mentions: 34200, growth: '+31%', status: 'Rising',
       sentiment: 'Positive', relatedKeywords: ['infrastructure', 'e-governance', 'UPI', 'startups'],
       recentPosts: [
-        { text: '30-day overview shows tremendous growth in rural connectivity #DigitalIndia.', sentiment: 'Positive', platform: 'Twitter', time: '15 min ago' },
+        { text: '30-day overview shows tremendous growth in rural connectivity #Business.', sentiment: 'Positive', platform: 'Twitter', time: '15 min ago' },
       ]
     },
     {
-      id: 3, tag: '#AIRevolution', mentions: 25800, growth: '+49%', status: 'Rising',
+      id: 3, tag: '#Technology', mentions: 25800, growth: '+49%', status: 'Rising',
       sentiment: 'Positive', relatedKeywords: ['LLMs', 'automation', 'productivity', 'research'],
       recentPosts: [
-        { text: 'AI adoption index up 35% across Indian enterprises this month #AIRevolution.', sentiment: 'Positive', platform: 'Twitter', time: '30 min ago' },
+        { text: 'AI adoption index up 35% across Indian enterprises this month #Technology.', sentiment: 'Positive', platform: 'Twitter', time: '30 min ago' },
       ]
     },
     {
@@ -561,7 +561,7 @@ export const alertsData = [
   {
     id: 'a5', severity: 'medium', title: 'Community Engagement Drop',
     topic: 'Digital India', time: '3 hours ago', read: true,
-    description: 'Engagement on #DigitalIndia Telegram broadcasts dropped 22% compared to previous week average.',
+    description: 'Engagement on #Business Telegram broadcasts dropped 22% compared to previous week average.',
     action: 'Investigate broadcast timing and format. Test interactive poll updates.',
     details: { volume: '820 posts/hr', change: '-22% drop', affectedPlatform: 'Telegram', urgency: 'This Week' }
   },

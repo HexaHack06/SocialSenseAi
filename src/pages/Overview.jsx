@@ -4,9 +4,6 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { useApp } from '../App';
-import {
-  audienceData, influencers
-} from '../data/mockData';
 
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '';
@@ -137,12 +134,14 @@ function TopicPanel({ topic, onClose }) {
 
         <div className="stat-row">
           <div className="stat-mini">
-            <div className="stat-mini-value">{(topic.mentions / 1000).toFixed(1)}K</div>
+            <div className="stat-mini-value">
+              {typeof topic.mentions === 'number' ? (topic.mentions / 1000).toFixed(1) : topic.mentions}K
+            </div>
             <div className="stat-mini-label">Mentions</div>
           </div>
           <div className="stat-mini">
-            <div className="stat-mini-value" style={{ color: topic.growth.startsWith('+') ? 'var(--color-positive)' : 'var(--color-negative)' }}>
-              {topic.growth}
+            <div className="stat-mini-value" style={{ color: (topic.growth || '').startsWith('+') ? 'var(--color-positive)' : 'var(--color-negative)' }}>
+              {topic.growth || '0%'}
             </div>
             <div className="stat-mini-label">Growth</div>
           </div>
@@ -150,34 +149,38 @@ function TopicPanel({ topic, onClose }) {
 
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Sentiment</div>
-          <span className={`badge badge-${topic.sentiment === 'Positive' ? 'positive' : topic.sentiment === 'Negative' ? 'negative' : 'neutral'}`}>
-            {topic.sentiment}
+          <span className={`badge badge-${(topic.sentiment || 'neutral').toLowerCase()}`}>
+            {topic.sentiment || 'Neutral'}
           </span>
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Related Keywords</div>
-          <div className="keyword-cloud">
-            {(topic.relatedKeywords || []).map(kw => (
-              <span key={kw} className="keyword-tag keyword-positive">{kw}</span>
+        {topic.relatedKeywords && topic.relatedKeywords.length > 0 && (
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Related Keywords</div>
+            <div className="keyword-cloud">
+              {topic.relatedKeywords.map(kw => (
+                <span key={kw} className="keyword-tag keyword-positive">{kw}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {topic.recentPosts && topic.recentPosts.length > 0 && (
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Recent Posts</div>
+            {topic.recentPosts.map((post, i) => (
+              <div key={i} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: 8 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 8 }}>
+                  "{post.text}"
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className={`badge badge-${(post.sentiment || 'neutral').toLowerCase()}`}>{post.sentiment || 'Neutral'}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{post.platform} · {post.time}</span>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Recent Posts</div>
-          {(topic.recentPosts || []).map((post, i) => (
-            <div key={i} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: 8 }}>
-              <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 8 }}>
-                "{post.text}"
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span className={`badge badge-${post.sentiment.toLowerCase()}`}>{post.sentiment}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{post.platform} · {post.time}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        )}
       </div>
     </div>
   );
@@ -196,9 +199,11 @@ export default function Overview() {
 
   const [showAnalyze, setShowAnalyze] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [selectedInfluencer, setSelectedInfluencer] = useState(influencers[0]);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
 
   const [apiData, setApiData] = useState(null);
+  const [audienceAgeGroups, setAudienceAgeGroups] = useState([]);
+  const [influencersList, setInfluencersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -228,20 +233,46 @@ export default function Overview() {
         });
 
         const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiBaseUrl}/api/overview?${params.toString()}`, {
-          signal: abortController.signal
-        });
 
-        if (!res.ok) {
-          throw new Error(`API returned status ${res.status}`);
+        const [overviewRes, audienceRes, networkRes] = await Promise.all([
+          fetch(`${apiBaseUrl}/api/overview?${params.toString()}`, { signal: abortController.signal }),
+          fetch(`${apiBaseUrl}/api/audience?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
+          fetch(`${apiBaseUrl}/api/network?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
+        ]);
+
+        if (!overviewRes.ok) {
+          throw new Error(`API returned status ${overviewRes.status}`);
         }
 
-        const result = await res.json();
+        const overviewJson = await overviewRes.json();
+        const audienceJson = audienceRes && audienceRes.ok ? await audienceRes.json() : null;
+        const networkJson = networkRes && networkRes.ok ? await networkRes.json() : null;
+
         if (isMounted) {
-          if (result.success && result.data) {
-            setApiData(result.data);
+          if (overviewJson.success && overviewJson.data) {
+            setApiData(overviewJson.data);
           } else {
-            throw new Error(result.message || 'Failed to fetch overview data');
+            throw new Error(overviewJson.message || 'Failed to fetch overview data');
+          }
+
+          if (audienceJson?.success && Array.isArray(audienceJson.data?.ageGroups)) {
+            setAudienceAgeGroups(audienceJson.data.ageGroups);
+          } else {
+            setAudienceAgeGroups([]);
+          }
+
+          if (networkJson?.success && Array.isArray(networkJson.data?.influencers)) {
+            const infs = networkJson.data.influencers;
+            setInfluencersList(infs);
+            setSelectedInfluencer(prev => {
+              if (prev && infs.some(i => i.id === prev.id)) {
+                return infs.find(i => i.id === prev.id);
+              }
+              return infs[0] || null;
+            });
+          } else {
+            setInfluencersList([]);
+            setSelectedInfluencer(null);
           }
         }
       } catch (err) {
@@ -441,6 +472,7 @@ export default function Overview() {
             <span>Updating overview data...</span>
           </div>
         )}
+
         {/* KPI Cards */}
         <div className="kpi-grid">
           <KPICard type="mentions" label="Total Mentions" value={data.mentions} delta={data.mentionsDelta} />
@@ -459,18 +491,24 @@ export default function Overview() {
               </span>
             </div>
             <div className="card-body">
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={timelineData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} unit="%" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend iconType="circle" iconSize={8} />
-                  <Line type="monotone" dataKey="positive" name="Positive" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="neutral" name="Neutral" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="negative" name="Negative" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {timelineData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={timelineData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} unit="%" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend iconType="circle" iconSize={8} />
+                    <Line type="monotone" dataKey="positive" name="Positive" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                    <Line type="monotone" dataKey="neutral" name="Neutral" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                    <Line type="monotone" dataKey="negative" name="Negative" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                  {loading ? 'Loading timeline...' : 'No sentiment timeline available for this range'}
+                </div>
+              )}
             </div>
           </div>
 
@@ -479,31 +517,39 @@ export default function Overview() {
               <div className="card-title">Audience Demographics</div>
             </div>
             <div className="card-body">
-              <ResponsiveContainer width="100%" height={160}>
-                <PieChart>
-                  <Pie
-                    data={audienceData.ageGroups}
-                    cx="50%" cy="50%"
-                    innerRadius={45} outerRadius={70}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {audienceData.ageGroups.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
+              {audienceAgeGroups.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <PieChart>
+                      <Pie
+                        data={audienceAgeGroups}
+                        cx="50%" cy="50%"
+                        innerRadius={45} outerRadius={70}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {audienceAgeGroups.map((entry, i) => (
+                          <Cell key={i} fill={entry.color || `hsl(${220 + i * 25}, 70%, 55%)`} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v) => `${v}%`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+                    {audienceAgeGroups.map((g, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: g.color || `hsl(${220 + i * 25}, 70%, 55%)` }} />
+                        <span style={{ color: 'var(--text-secondary)' }}>{g.name}</span>
+                        <strong>{g.value}%</strong>
+                      </div>
                     ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => `${v}%`} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
-                {audienceData.ageGroups.map((g, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: g.color }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>{g.name}</span>
-                    <strong>{g.value}%</strong>
                   </div>
-                ))}
-              </div>
+                </>
+              ) : (
+                <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                  {loading ? 'Loading demographics...' : 'Audience demographic data unavailable in dataset'}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -516,29 +562,35 @@ export default function Overview() {
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Click to explore →</span>
             </div>
             <div className="card-body">
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart
-                  data={currentTrending}
-                  layout="vertical"
-                  margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
-                  onClick={({ activePayload }) => {
-                    if (activePayload?.[0]) {
-                      const t = currentTrending.find(t => t.tag === activePayload[0].payload.tag);
-                      setSelectedTopic(t);
-                    }
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
-                  <YAxis type="category" dataKey="tag" tick={{ fontSize: 12, fill: '#475569' }} width={100} />
-                  <Tooltip formatter={(v) => [`${(v / 1000).toFixed(1)}K mentions`, 'Mentions']} />
-                  <Bar dataKey="mentions" radius={[0, 6, 6, 0]} cursor="pointer">
-                    {currentTrending.map((_, i) => (
-                      <Cell key={i} fill={['#6366f1', '#3b82f6', '#22d3ee', '#a78bfa', '#10b981'][i % 5]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {currentTrending.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart
+                    data={currentTrending}
+                    layout="vertical"
+                    margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
+                    onClick={({ activePayload }) => {
+                      if (activePayload?.[0]) {
+                        const t = currentTrending.find(t => t.tag === activePayload[0].payload.tag);
+                        setSelectedTopic(t);
+                      }
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
+                    <YAxis type="category" dataKey="tag" tick={{ fontSize: 12, fill: '#475569' }} width={100} />
+                    <Tooltip formatter={(v) => [`${(v / 1000).toFixed(1)}K mentions`, 'Mentions']} />
+                    <Bar dataKey="mentions" radius={[0, 6, 6, 0]} cursor="pointer">
+                      {currentTrending.map((_, i) => (
+                        <Cell key={i} fill={['#6366f1', '#3b82f6', '#22d3ee', '#a78bfa', '#10b981'][i % 5]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                  {loading ? 'Loading trending topics...' : 'No trending topics found'}
+                </div>
+              )}
             </div>
           </div>
 
@@ -548,23 +600,29 @@ export default function Overview() {
               <div className="card-title">Top Influencers</div>
             </div>
             <div className="card-body" style={{ padding: '12px 16px' }}>
-              {influencers.slice(0, 5).map((inf, i) => (
-                <div
-                  key={inf.id}
-                  className={`influencer-item ${selectedInfluencer?.id === inf.id ? 'active' : ''}`}
-                  onClick={() => setSelectedInfluencer(inf)}
-                >
-                  <span className="influencer-rank">{i + 1}</span>
-                  <div className="influencer-avatar" style={{ background: avatarColors[i % avatarColors.length] }}>
-                    {inf.username[1].toUpperCase()}
+              {influencersList.length > 0 ? (
+                influencersList.slice(0, 5).map((inf, i) => (
+                  <div
+                    key={inf.id || i}
+                    className={`influencer-item ${selectedInfluencer?.id === inf.id ? 'active' : ''}`}
+                    onClick={() => setSelectedInfluencer(inf)}
+                  >
+                    <span className="influencer-rank">{i + 1}</span>
+                    <div className="influencer-avatar" style={{ background: avatarColors[i % avatarColors.length] }}>
+                      {(inf.username || '@?')[1]?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="influencer-info">
+                      <div className="influencer-username">{inf.username}</div>
+                      <div className="influencer-name">{inf.community}</div>
+                    </div>
+                    <span className="influencer-score">{inf.score}</span>
                   </div>
-                  <div className="influencer-info">
-                    <div className="influencer-username">{inf.username}</div>
-                    <div className="influencer-name">{inf.community}</div>
-                  </div>
-                  <span className="influencer-score">{inf.score}</span>
+                ))
+              ) : (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                  {loading ? 'Loading influencers...' : 'Influencer data unavailable'}
                 </div>
-              ))}
+              )}
             </div>
             {selectedInfluencer && (
               <div style={{ padding: '14px 18px', borderTop: '1px solid var(--border-subtle)', background: 'var(--surface-2)', borderRadius: '0 0 var(--radius-lg) var(--radius-lg)' }}>
@@ -573,11 +631,11 @@ export default function Overview() {
                   {[
                     ['Influence', selectedInfluencer.score],
                     ['PageRank', selectedInfluencer.pagerank],
-                    ['Connections', selectedInfluencer.connections.toLocaleString()],
+                    ['Connections', typeof selectedInfluencer.connections === 'number' ? selectedInfluencer.connections.toLocaleString() : selectedInfluencer.connections],
                   ].map(([k, v]) => (
                     <div key={k} style={{ fontSize: 12 }}>
                       <span style={{ color: 'var(--text-muted)' }}>{k}: </span>
-                      <strong>{v}</strong>
+                      <strong>{v ?? '—'}</strong>
                     </div>
                   ))}
                 </div>
