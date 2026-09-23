@@ -1,9 +1,11 @@
-﻿import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import {
   LayoutDashboard, MessageCircle, TrendingUp, Users,
   Share2, Bell, FileText, Settings, X
 } from 'lucide-react';
+import { useApp } from '../App';
+import { PROD_API_URL } from '../config/api';
 
 const navItems = [
   { path: '/overview',  label: 'Overview',  Icon: LayoutDashboard },
@@ -27,6 +29,7 @@ const mobileNavItems = [
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { backendStatus } = useApp();
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
@@ -39,6 +42,28 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     navigate(path);
     setSidebarOpen(false);
   };
+
+  // ── Backend status pill helpers ───────────────────────────────
+  const isCloud = backendStatus?.serverUrl?.includes('onrender.com') ||
+                  backendStatus?.serverUrl === PROD_API_URL;
+  const isChecking = backendStatus?.checking || backendStatus?.ok === null;
+
+  let statusColor = '#6b7280'; // grey = unknown
+  let statusLabel = 'Connecting...';
+  let dotAnim = 'pulse 2s infinite';
+
+  if (!isChecking) {
+    if (backendStatus?.ok) {
+      statusColor = '#10b981'; // green = connected
+      statusLabel = isCloud ? 'Cloud · ' + backendStatus.latencyMs + 'ms'
+                            : 'Local · ' + backendStatus.latencyMs + 'ms';
+      dotAnim = 'pulse 2s infinite';
+    } else {
+      statusColor = '#ef4444'; // red = offline
+      statusLabel = 'Backend Offline';
+      dotAnim = 'none';
+    }
+  }
 
   return (
     <>
@@ -91,13 +116,30 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="demo-badge">
-            <div className="demo-dot" />
-            <span>Demo Mode</span>
+          {/* Live backend status pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 10px',
+            background: backendStatus?.ok ? 'rgba(16,185,129,0.08)' : isChecking ? 'rgba(99,102,241,0.08)' : 'rgba(239,68,68,0.08)',
+            border: `1px solid ${statusColor}40`,
+            borderRadius: 'var(--radius-full)',
+            marginBottom: 6,
+            width: '100%',
+            boxSizing: 'border-box',
+          }}>
+            <div style={{
+              width: 6, height: 6, background: statusColor,
+              borderRadius: '50%', flexShrink: 0,
+              animation: dotAnim,
+            }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: statusColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {statusLabel}
+            </span>
           </div>
+
           <div className="connected-badge">
             <div className="connected-dot" />
-            <span>Connected</span>
+            <span>MongoDB Connected</span>
           </div>
         </div>
       </aside>

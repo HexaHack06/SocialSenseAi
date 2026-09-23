@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Overview from './pages/Overview';
@@ -10,6 +10,7 @@ import Network from './pages/Network';
 import Alerts from './pages/Alerts';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import { checkBackendHealth, getApiBaseUrl } from './config/api';
 
 export const AppContext = createContext();
 
@@ -24,8 +25,36 @@ export default function App() {
   const [analyzing, setAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ── Backend connection status ─────────────────────────────────
+  const [backendStatus, setBackendStatus] = useState({
+    ok: null,       // null = unknown, true = connected, false = offline
+    latencyMs: null,
+    serverUrl: getApiBaseUrl(),
+    checking: false,
+  });
+
+  const pingBackend = useCallback(async () => {
+    setBackendStatus(s => ({ ...s, checking: true }));
+    const result = await checkBackendHealth(getApiBaseUrl());
+    setBackendStatus({ ...result, checking: false });
+  }, []);
+
+  // Ping on mount and every 60 seconds
+  useEffect(() => {
+    pingBackend();
+    const id = setInterval(pingBackend, 60000);
+    return () => clearInterval(id);
+  }, [pingBackend]);
+
   return (
-    <AppContext.Provider value={{ platform, setPlatform, dateRange, setDateRange, analyzed, setAnalyzed, analyzing, setAnalyzing }}>
+    <AppContext.Provider value={{
+      platform, setPlatform,
+      dateRange, setDateRange,
+      analyzed, setAnalyzed,
+      analyzing, setAnalyzing,
+      backendStatus, setBackendStatus,
+      pingBackend,
+    }}>
       <div className="app-shell">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="main-content">

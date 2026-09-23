@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../App';
-import { API_BASE_URL } from '../config/api';
+import { getApiBaseUrl } from '../config/api';
 
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '';
@@ -119,7 +119,7 @@ export default function Alerts() {
           startDate,
           endDate,
         });
-        const res = await fetch(`${API_BASE_URL}/api/alerts?${params.toString()}`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/alerts?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {

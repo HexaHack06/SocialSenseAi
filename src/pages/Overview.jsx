@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { useApp } from '../App';
-import { API_BASE_URL } from '../config/api';
+import { getApiBaseUrl } from '../config/api';
 
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '';
@@ -234,9 +234,9 @@ export default function Overview() {
         });
 
         const [overviewRes, audienceRes, networkRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/overview?${params.toString()}`, { signal: abortController.signal }),
-          fetch(`${API_BASE_URL}/api/audience?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
-          fetch(`${API_BASE_URL}/api/network?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
+          fetch(`${getApiBaseUrl()}/api/overview?${params.toString()}`, { signal: abortController.signal }),
+          fetch(`${getApiBaseUrl()}/api/audience?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
+          fetch(`${getApiBaseUrl()}/api/network?${params.toString()}`, { signal: abortController.signal }).catch(() => null),
         ]);
 
         if (!overviewRes.ok) {

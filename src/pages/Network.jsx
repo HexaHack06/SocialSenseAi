@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../App';
-import { API_BASE_URL } from '../config/api';
+import { getApiBaseUrl } from '../config/api';
 
 const avatarColors = ['#6366f1', '#3b82f6', '#22d3ee', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'];
 
@@ -259,7 +259,7 @@ export default function Network() {
           startDate,
           endDate,
         });
-        const res = await fetch(`${API_BASE_URL}/api/network?${params.toString()}`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/network?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {

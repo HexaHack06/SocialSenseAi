@@ -4,7 +4,7 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { useApp } from '../App';
-import { API_BASE_URL } from '../config/api';
+import { getApiBaseUrl } from '../config/api';
 
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '';
@@ -166,7 +166,7 @@ export default function Trends() {
           startDate,
           endDate,
         });
-        const res = await fetch(`${API_BASE_URL}/api/trends?${params.toString()}`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/trends?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) {

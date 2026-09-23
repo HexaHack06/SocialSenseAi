@@ -1,11 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   AreaChart, Area, RadarChart, Radar, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import { useApp } from '../App';
-import { API_BASE_URL } from '../config/api';
+import { getApiBaseUrl, analyzeSentimentText } from '../config/api';
+
+// Dynamic API URL (supports localStorage switcher)
+const getAPI = () => getApiBaseUrl();
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -88,7 +91,7 @@ export default function Sentiment() {
           startDate,
           endDate,
         });
-        const res = await fetch(`${API_BASE_URL}/api/sentiment?${params.toString()}`, {
+        const res = await fetch(`${getAPI()}/api/sentiment?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) throw new Error(`API returned status ${res.status}`);
@@ -209,7 +212,35 @@ export default function Sentiment() {
 
   const handleResetDates = () => { setStartDate('2022-12-31'); setEndDate('2023-05-15'); };
 
+  // ── Live AI Analyzer state ──────────────────────────────────
+  const [analyzeText, setAnalyzeText] = useState('');
+  const [analyzePlatform, setAnalyzePlatform] = useState('twitter');
+  const [analyzeSave, setAnalyzeSave] = useState(false);
+  const [analyzeLoading, setAnalyzeLoading] = useState(false);
+  const [analyzeResult, setAnalyzeResult] = useState(null);
+  const [analyzeError, setAnalyzeError] = useState(null);
+
+  const handleAnalyze = useCallback(async () => {
+    if (!analyzeText.trim()) return;
+    setAnalyzeLoading(true);
+    setAnalyzeResult(null);
+    setAnalyzeError(null);
+    try {
+      const result = await analyzeSentimentText({
+        text: analyzeText.trim(),
+        platform: analyzePlatform,
+        save: analyzeSave,
+      });
+      setAnalyzeResult(result);
+    } catch (err) {
+      setAnalyzeError(err.message);
+    } finally {
+      setAnalyzeLoading(false);
+    }
+  }, [analyzeText, analyzePlatform, analyzeSave]);
+
   // ── Render ─────────────────────────────────────────────────
+
 
   return (
     <>
@@ -466,6 +497,137 @@ export default function Sentiment() {
             </div>
           </div>
         )}
+
+        {/* ── Live AI Sentiment Analyzer ──────────────────────── */}
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card-header">
+            <div className="card-title">⚡ Live AI Sentiment &amp; Topic Analyzer</div>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+              FastAPI AI Service
+            </span>
+          </div>
+          <div className="card-body">
+            <div style={{ marginBottom: 12 }}>
+              <textarea
+                id="ai-analyzer-input"
+                placeholder="Paste any social media post, comment, or customer feedback to analyze with AI..."
+                value={analyzeText}
+                onChange={e => setAnalyzeText(e.target.value)}
+                rows={3}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)',
+                  padding: '10px 12px', fontSize: 13, resize: 'vertical',
+                  fontFamily: 'inherit', outline: 'none', transition: 'border-color 0.2s',
+                }}
+                onFocus={e => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <select
+                value={analyzePlatform}
+                onChange={e => setAnalyzePlatform(e.target.value)}
+                className="select-control"
+                style={{ minWidth: 140 }}
+                id="ai-analyzer-platform"
+              >
+                <option value="twitter">Twitter / X</option>
+                <option value="instagram">Instagram</option>
+                <option value="telegram">Telegram</option>
+                <option value="manual">Manual / Custom</option>
+              </select>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={analyzeSave}
+                  onChange={e => setAnalyzeSave(e.target.checked)}
+                  style={{ accentColor: 'var(--brand-primary)' }}
+                />
+                Save to database
+              </label>
+              <button
+                id="ai-analyze-btn"
+                className="btn btn-primary"
+                onClick={handleAnalyze}
+                disabled={analyzeLoading || !analyzeText.trim()}
+                style={{ marginLeft: 'auto' }}
+              >
+                {analyzeLoading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
+                    Analyzing...
+                  </span>
+                ) : '⚡ Analyze with AI'}
+              </button>
+            </div>
+
+            {/* Error */}
+            {analyzeError && (
+              <div style={{
+                marginTop: 12, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                color: '#ef4444', fontSize: 13
+              }}>
+                ⚠️ {analyzeError}
+              </div>
+            )}
+
+            {/* Result */}
+            {analyzeResult && !analyzeLoading && (
+              <div className="fade-in-up" style={{
+                marginTop: 16, padding: '16px',
+                background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+              }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* Sentiment badge */}
+                  <div style={{ textAlign: 'center', minWidth: 90 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Sentiment</div>
+                    <span className={`badge badge-${(analyzeResult.sentiment || 'neutral').toLowerCase()}`}
+                      style={{ fontSize: 14, padding: '5px 14px' }}>
+                      {analyzeResult.sentiment || 'Neutral'}
+                    </span>
+                  </div>
+                  {/* Topic */}
+                  <div style={{ textAlign: 'center', minWidth: 90 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Topic</div>
+                    <span className="badge badge-info" style={{ fontSize: 13 }}>
+                      {analyzeResult.topic || 'General'}
+                    </span>
+                  </div>
+                  {/* Keywords */}
+                  {analyzeResult.keywords && analyzeResult.keywords.length > 0 && (
+                    <div style={{ flex: 1, minWidth: 180 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Keywords</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {analyzeResult.keywords.map((kw, i) => (
+                          <span key={i} style={{
+                            padding: '2px 10px', borderRadius: 'var(--radius-full)',
+                            background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)',
+                            color: 'var(--brand-primary)', fontSize: 12, fontWeight: 500
+                          }}>{kw}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {analyzeResult.fallback && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+                    ℹ️ AI service used rule-based fallback analysis.
+                  </div>
+                )}
+                {analyzeSave && analyzeResult.postId && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: '#10b981' }}>
+                    ✅ Post saved to database (ID: {analyzeResult.postId})
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ── Posts Table ──────────────────────────────────────── */}
         <div className="card">
