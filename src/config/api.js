@@ -15,6 +15,19 @@ export function getApiBaseUrl() {
   const stored = typeof localStorage !== 'undefined'
     ? localStorage.getItem('ss_api_url')
     : null;
+
+  // On HTTPS deployments (e.g. GitHub Pages), plain HTTP URLs are blocked as Mixed Content
+  if (
+    stored &&
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    stored.startsWith('http://') &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return PROD_API_URL;
+  }
+
   return (
     stored ||
     import.meta.env.VITE_API_URL ||
@@ -36,7 +49,7 @@ export async function checkBackendHealth(serverUrl) {
   const t0 = Date.now();
   try {
     const res = await fetch(`${url}/api/health`, {
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(15000),
     });
     const latencyMs = Date.now() - t0;
     if (res.ok) {

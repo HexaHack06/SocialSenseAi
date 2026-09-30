@@ -158,21 +158,30 @@ export default function Sentiment() {
   // Emotion breakdown: from API or derived from topic distribution
   const radarData = useMemo(() => {
     if (apiData?.emotionBreakdown?.length) {
-      return apiData.emotionBreakdown.map(e => ({
-        emotion: e.emotion ?? e.name,
-        value: e.value ?? e.count ?? 0,
-        fullMark: 100,
-      }));
+      const maxCount = Math.max(...apiData.emotionBreakdown.map(e => e.count || 0), 1);
+      return apiData.emotionBreakdown.map(e => {
+        const rawName = e.emotion ?? e.name ?? '';
+        const emotion = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : 'Unknown';
+        const dynamicVal = (typeof e.value === 'number' && (e.value > 60 || e.value < 40))
+          ? e.value
+          : Math.round(((e.count || 0) / maxCount) * 100);
+        return {
+          emotion,
+          value: dynamicVal,
+          count: e.count ?? 0,
+          fullMark: 100,
+        };
+      });
     }
     // Derive approximate emotion proxy from sentiment percentages
     if (positivePct || negativePct || neutralPct) {
       return [
-        { emotion: 'Joy',         value: Math.round(positivePct * 0.6),  fullMark: 100 },
-        { emotion: 'Trust',       value: Math.round(positivePct * 0.5),  fullMark: 100 },
-        { emotion: 'Optimism',    value: Math.round(positivePct * 0.45), fullMark: 100 },
-        { emotion: 'Anger',       value: Math.round(negativePct * 0.55), fullMark: 100 },
-        { emotion: 'Frustration', value: Math.round(negativePct * 0.5),  fullMark: 100 },
-        { emotion: 'Surprise',    value: Math.round(neutralPct  * 0.3),  fullMark: 100 },
+        { emotion: 'Joy',         value: Math.round(positivePct * 0.8),  fullMark: 100 },
+        { emotion: 'Trust',       value: Math.round(positivePct * 0.6),  fullMark: 100 },
+        { emotion: 'Optimism',    value: Math.round(positivePct * 0.5),  fullMark: 100 },
+        { emotion: 'Anger',       value: Math.round(negativePct * 0.7),  fullMark: 100 },
+        { emotion: 'Frustration', value: Math.round(negativePct * 0.6),  fullMark: 100 },
+        { emotion: 'Surprise',    value: Math.round(neutralPct  * 0.4),  fullMark: 100 },
       ];
     }
     return [];
@@ -326,6 +335,23 @@ export default function Sentiment() {
           }}>
             <span>⚠️</span>
             <span>Unable to load sentiment data: {error}</span>
+          </div>
+        {/* Out of range dataset guidance */}
+        {!loading && apiData && totalMentions === 0 && !dateError && (
+          <div style={{
+            padding: '12px 16px', marginBottom: 16,
+            borderRadius: 'var(--radius-sm)', background: 'rgba(99,102,241,0.1)',
+            border: '1px solid rgba(99,102,241,0.3)', color: '#c7d2fe',
+            fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap'
+          }}>
+            <span>📅 No posts found for <strong>{startDate} – {endDate}</strong>. The uploaded dataset covers <strong>Dec 31, 2022 to May 15, 2023</strong>.</span>
+            <button
+              onClick={handleResetDates}
+              className="btn btn-secondary btn-sm"
+              style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}
+            >
+              Reset to Dataset Range
+            </button>
           </div>
         )}
 

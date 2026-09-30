@@ -31,7 +31,7 @@ export default function Settings() {
 
   // ── Backend switcher ─────────────────────────────────────────
   const [selectedServer, setSelectedServer] = useState(
-    () => localStorage.getItem('ss_api_url') || DEV_API_URL
+    () => localStorage.getItem('ss_api_url') || (import.meta.env.PROD ? PROD_API_URL : DEV_API_URL)
   );
   const [customUrl, setCustomUrl] = useState('');
   const [healthResult, setHealthResult] = useState(null);
