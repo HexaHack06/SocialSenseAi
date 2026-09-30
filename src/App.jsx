@@ -20,7 +20,7 @@ export function useApp() {
 
 export default function App() {
   const [platform, setPlatform] = useState('all');
-  const [dateRange, setDateRange] = useState('May 12, 2026 – May 18, 2026');
+  const [dateRange, setDateRange] = useState('Dec 31, 2022 – May 15, 2023');
   const [analyzed, setAnalyzed] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
