@@ -172,7 +172,7 @@ function TopicPanel({ topic, onClose }) {
             {topic.recentPosts.map((post, i) => (
               <div key={i} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: 8 }}>
                 <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 8 }}>
-                  "{post.text}"
+                  "{post.text || post.post || ''}"
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className={`badge badge-${(post.sentiment || 'neutral').toLowerCase()}`}>{post.sentiment || 'Neutral'}</span>
@@ -345,7 +345,8 @@ export default function Overview() {
       .filter(p => p.topicName === t.topicName || p.topicId === t.topicId)
       .slice(0, 4)
       .map(p => ({
-        text: p.text,
+        text: p.text || p.post || '',
+        post: p.post || p.text || '',
         sentiment: p.sentiment ? p.sentiment.charAt(0).toUpperCase() + p.sentiment.slice(1) : 'Neutral',
         platform: p.platform ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1) : 'Web',
         time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'

@@ -111,7 +111,7 @@ function TopicDetailPanel({ topic, originSteps = [], onClose }) {
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Recent Posts</div>
             {topic.recentPosts.map((post, i) => (
               <div key={i} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: 8 }}>
-                <div style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>"{post.text}"</div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>"{post.text || post.post || ''}"</div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <span className={`badge badge-${(post.sentiment || 'neutral').toLowerCase()}`}>{post.sentiment || 'Neutral'}</span>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{post.platform} · {post.time}</span>

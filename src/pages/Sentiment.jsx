@@ -187,27 +187,34 @@ export default function Sentiment() {
     return [];
   }, [apiData, positivePct, negativePct, neutralPct]);
 
+  // ── Selected post for detail modal ────────────────────────
+  const [selectedPost, setSelectedPost] = useState(null);
+
   // Aspect breakdown: from API if present
   const aspectData = apiData?.aspectBreakdown ?? null;
 
   // Recent posts mapped from API recentPosts
   const rawPosts = apiData?.recentPosts ?? [];
   const mappedPosts = rawPosts.map((p, idx) => ({
-    id: p._id ?? idx,
-    post: p.text ?? '',
+    id: p.id ?? p._id ?? idx,
+    post: p.post || p.text || p.content || '',
+    text: p.text || p.post || p.content || '',
     sentiment: p.sentiment
       ? p.sentiment.charAt(0).toUpperCase() + p.sentiment.slice(1)
       : 'Neutral',
     emotion: p.emotion ?? '—',
-    confidence: p.sentimentScore != null
-      ? Math.round(Math.abs(p.sentimentScore) * 100)
-      : null,
+    confidence: p.confidence != null
+      ? p.confidence
+      : (p.sentimentScore != null ? Math.round(Math.abs(p.sentimentScore) * 100) : 0),
     platform: p.platform
       ? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
-      : 'Web',
-    time: p.createdAt
+      : 'Twitter',
+    time: p.time || (p.createdAt
       ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : 'Recently',
+      : 'Recently'),
+    username: p.username || '—',
+    metrics: p.metrics || {},
+    sentimentScore: p.sentimentScore
   }));
 
   const filteredPosts = useMemo(() => {
@@ -696,13 +703,23 @@ export default function Sentiment() {
                   <th>Confidence</th>
                   <th>Platform</th>
                   <th>Time</th>
+                  <th style={{ textAlign: 'center' }}>Details</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredPosts.length > 0
                   ? filteredPosts.map(post => (
-                      <tr key={post.id}>
-                        <td><div className="post-text">{post.post}</div></td>
+                      <tr
+                        key={post.id}
+                        onClick={() => setSelectedPost(post)}
+                        style={{ cursor: 'pointer' }}
+                        title="Click to view full post details"
+                      >
+                        <td>
+                          <div className="post-text" style={{ wordBreak: 'break-word' }}>
+                            {post.post || post.text || '—'}
+                          </div>
+                        </td>
                         <td>
                           <span className={`badge badge-${post.sentiment.toLowerCase()}`}>
                             {post.sentiment}
@@ -723,11 +740,24 @@ export default function Sentiment() {
                         </td>
                         <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{post.platform}</td>
                         <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{post.time}</td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPost(post);
+                            }}
+                            style={{ padding: '3px 8px', fontSize: 11 }}
+                          >
+                            View
+                          </button>
+                        </td>
                       </tr>
                     ))
                   : !loading && (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px', fontSize: 13 }}>
+                        <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px', fontSize: 13 }}>
                           {error ? 'Could not load posts.' : 'No posts match the current filters.'}
                         </td>
                       </tr>
@@ -737,6 +767,132 @@ export default function Sentiment() {
             </table>
           </div>
         </div>
+
+        {/* ── Post Details Modal ─────────────────────────────── */}
+        {selectedPost && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: 20
+            }}
+            onClick={() => setSelectedPost(null)}
+          >
+            <div
+              className="card"
+              style={{
+                maxWidth: 600,
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg, 12px)',
+                padding: '24px',
+                animation: 'fadeIn 0.15s ease-out'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Post Details</span>
+                    <span className={`badge badge-${(selectedPost.sentiment || 'neutral').toLowerCase()}`}>
+                      {selectedPost.sentiment}
+                    </span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
+                      {selectedPost.platform}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    Author: <strong style={{ color: 'var(--text-primary)' }}>{selectedPost.username || 'Anonymous'}</strong> · {selectedPost.time}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPost(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: 22,
+                    cursor: 'pointer',
+                    color: 'var(--text-muted)',
+                    lineHeight: 1,
+                    padding: 4
+                  }}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{
+                background: 'var(--surface-2)',
+                borderRadius: 8,
+                padding: '16px',
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: 'var(--text-primary)',
+                marginBottom: 20,
+                borderLeft: '4px solid var(--brand-primary)',
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap'
+              }}>
+                "{selectedPost.post || selectedPost.text}"
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Emotion</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{selectedPost.emotion || '—'}</div>
+                </div>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>AI Confidence</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {selectedPost.confidence != null ? `${selectedPost.confidence}%` : '—'}
+                  </div>
+                </div>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Likes</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {selectedPost.metrics?.likes ?? 0}
+                  </div>
+                </div>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Shares / Reposts</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {selectedPost.metrics?.shares ?? selectedPost.metrics?.retweets ?? 0}
+                  </div>
+                </div>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Comments</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {selectedPost.metrics?.comments ?? selectedPost.metrics?.replies ?? 0}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setSelectedPost(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
