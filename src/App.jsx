@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import TopInfoBanner from './components/TopInfoBanner';
 import Overview from './pages/Overview';
 import Sentiment from './pages/Sentiment';
 import Trends from './pages/Trends';
@@ -58,6 +59,9 @@ export default function App() {
       <div className="app-shell">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="main-content">
+          {/* Top global information tagline — visible on every page */}
+          <TopInfoBanner />
+
           {/* Mobile top bar — inside main-content so it sits above page content correctly */}
           <div className="mobile-topbar">
             <button

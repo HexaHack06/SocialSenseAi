@@ -315,7 +315,7 @@ export default function Overview() {
   const timelineData = (apiData?.sentimentTimeline || []).map(item => {
     let displayDate = item.date;
     try {
-      const d = new Date(item.date);
+      const d = new Date(item.date + (item.date.length <= 10 ? 'T00:00:00' : ''));
       if (!isNaN(d.getTime())) {
         displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
@@ -323,12 +323,15 @@ export default function Overview() {
       // fallback
     }
 
-    const total = item.total || (item.positive + item.neutral + item.negative) || 0;
+    const sum = (item.positive || 0) + (item.neutral || 0) + (item.negative || 0);
+    const isAlreadyPct = sum <= 105 && (item.positive || 0) <= 100 && (item.negative || 0) <= 100;
+    const total = item.total || sum || 0;
+
     return {
       date: displayDate,
-      positive: total > 0 ? Number(((item.positive / total) * 100).toFixed(1)) : item.positive,
-      neutral: total > 0 ? Number(((item.neutral / total) * 100).toFixed(1)) : item.neutral,
-      negative: total > 0 ? Number(((item.negative / total) * 100).toFixed(1)) : item.negative,
+      positive: isAlreadyPct ? Number(Number(item.positive || 0).toFixed(1)) : (total > 0 ? Number(((item.positive / total) * 100).toFixed(1)) : 0),
+      neutral:  isAlreadyPct ? Number(Number(item.neutral  || 0).toFixed(1)) : (total > 0 ? Number(((item.neutral  / total) * 100).toFixed(1)) : 0),
+      negative: isAlreadyPct ? Number(Number(item.negative || 0).toFixed(1)) : (total > 0 ? Number(((item.negative / total) * 100).toFixed(1)) : 0),
       total: item.total
     };
   });
@@ -495,7 +498,7 @@ export default function Overview() {
                 <ResponsiveContainer width="100%" height={240}>
                   <LineChart data={timelineData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} minTickGap={25} />
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} unit="%" />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={8} />

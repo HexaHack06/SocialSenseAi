@@ -137,21 +137,26 @@ export default function Sentiment() {
     { name: 'Negative', value: negativePct, count: negativeCount, color: '#ef4444' },
   ];
 
-  // Sentiment timeline: convert raw counts to percentages
+  // Sentiment timeline: support pre-computed percentages or raw counts
   const timelineData = (apiData?.sentimentTimeline || []).map(item => {
     let displayDate = item.date;
     try {
-      const d = new Date(item.date);
+      const d = new Date(item.date + (item.date.length <= 10 ? 'T00:00:00' : ''));
       if (!isNaN(d.getTime())) {
         displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
     } catch { /* fallback */ }
-    const total = item.total || (item.positive + item.neutral + item.negative) || 0;
+
+    // If backend already calculated percentages (sum ~ 100), use directly; otherwise calculate from total
+    const sum = (item.positive || 0) + (item.neutral || 0) + (item.negative || 0);
+    const isAlreadyPct = sum <= 105 && (item.positive || 0) <= 100 && (item.negative || 0) <= 100;
+    const total = item.total || sum || 0;
+
     return {
       date: displayDate,
-      positive: total > 0 ? Number(((item.positive / total) * 100).toFixed(1)) : 0,
-      neutral:  total > 0 ? Number(((item.neutral  / total) * 100).toFixed(1)) : 0,
-      negative: total > 0 ? Number(((item.negative / total) * 100).toFixed(1)) : 0,
+      positive: isAlreadyPct ? Number(Number(item.positive || 0).toFixed(1)) : (total > 0 ? Number(((item.positive / total) * 100).toFixed(1)) : 0),
+      neutral:  isAlreadyPct ? Number(Number(item.neutral  || 0).toFixed(1)) : (total > 0 ? Number(((item.neutral  / total) * 100).toFixed(1)) : 0),
+      negative: isAlreadyPct ? Number(Number(item.negative || 0).toFixed(1)) : (total > 0 ? Number(((item.negative / total) * 100).toFixed(1)) : 0),
     };
   });
 
@@ -489,7 +494,7 @@ export default function Sentiment() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} minTickGap={25} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} unit="%" />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend iconType="circle" iconSize={8} />

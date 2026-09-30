@@ -10,6 +10,7 @@
   /* Sidebar */
   --sidebar-bg: #0a0e1a;
   --sidebar-w: 240px;
+  --top-banner-h: 34px;
 
   /* Brand colors */
   --brand-primary: #6366f1;
@@ -254,6 +255,55 @@ input, select { font-family: inherit; }
   max-width: 100%;
 }
 
+/* ── Top Information Banner ─────────────────────────────────── */
+.top-info-banner {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.09) 0%, rgba(59, 130, 246, 0.11) 50%, rgba(34, 211, 238, 0.08) 100%);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.24);
+  padding: 8px 18px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.06);
+  min-height: var(--top-banner-h, 34px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-info-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 1300px;
+  width: 100%;
+  text-align: center;
+}
+
+.top-info-banner-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand-primary, #6366f1);
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.7);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+.top-info-banner-icon {
+  color: var(--brand-primary, #6366f1);
+  flex-shrink: 0;
+}
+
+.top-info-banner-text {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.015em;
+  color: #1e1b4b;
+}
+
 /* ── Page Header ────────────────────────────────────────────── */
 .page-header {
   padding: 24px 32px 20px;
@@ -265,7 +315,7 @@ input, select { font-family: inherit; }
   gap: 16px;
   flex-wrap: wrap;
   position: sticky;
-  top: 0;
+  top: var(--top-banner-h, 34px);
   z-index: 50;
   box-shadow: var(--shadow-xs);
 }
@@ -1307,6 +1357,24 @@ input, select { font-family: inherit; }
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+
+  /* Top info banner on mobile */
+  .top-info-banner {
+    position: relative;
+    top: auto;
+    padding: 7px 12px;
+    min-height: auto;
+    z-index: 100;
+  }
+
+  .top-info-banner-content {
+    gap: 6px;
+  }
+
+  .top-info-banner-text {
+    font-size: 11px;
+    line-height: 1.35;
   }
 
   /* Mobile top bar */
