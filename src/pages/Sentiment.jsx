@@ -336,6 +336,8 @@ export default function Sentiment() {
             <span>⚠️</span>
             <span>Unable to load sentiment data: {error}</span>
           </div>
+        )}
+
         {/* Out of range dataset guidance */}
         {!loading && apiData && totalMentions === 0 && !dateError && (
           <div style={{
