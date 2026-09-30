@@ -190,8 +190,6 @@ export default function Sentiment() {
   // ── Selected post for detail modal ────────────────────────
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // Aspect breakdown: from API if present
-  const aspectData = apiData?.aspectBreakdown ?? null;
 
   // Recent posts mapped from API recentPosts
   const rawPosts = apiData?.recentPosts ?? [];
@@ -507,31 +505,6 @@ export default function Sentiment() {
             )}
           </div>
         </div>
-
-        {/* ── Aspect Breakdown (when API provides it) ──────────── */}
-        {aspectData && aspectData.length > 0 && (
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div className="card-header">
-              <div className="card-title">Aspect Breakdown</div>
-            </div>
-            <div className="card-body">
-              {aspectData.map((asp, i) => (
-                <div key={i} style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-                    <span>{asp.aspect ?? asp.name}</span>
-                    <span style={{ color: 'var(--text-muted)' }}>{asp.positive != null ? `+${asp.positive}% pos` : ''}</span>
-                  </div>
-                  <div className="progress-track" style={{ height: 8 }}>
-                    <div className="progress-fill" style={{
-                      width: `${asp.value ?? asp.positive ?? 0}%`,
-                      background: 'linear-gradient(90deg, var(--brand-primary), var(--brand-secondary))'
-                    }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* ── Live AI Sentiment Analyzer ──────────────────────── */}
         <div className="card" style={{ marginBottom: 20 }}>
