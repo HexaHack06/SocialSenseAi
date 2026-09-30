@@ -189,9 +189,7 @@ function TopicPanel({ topic, onClose }) {
 
 // ── Overview Page ─────────────────────────────────────────────
 export default function Overview() {
-  const { platform, setPlatform, setDateRange, setAnalyzed } = useApp();
-  const [startDate, setStartDate] = useState('2022-12-31');
-  const [endDate, setEndDate] = useState('2023-05-15');
+  const { platform, setPlatform, startDate, setStartDate, endDate, setEndDate, setAnalyzed } = useApp();
   const dateError = !startDate || !endDate
     ? 'Please select both From and To dates.'
     : startDate > endDate
@@ -207,13 +205,6 @@ export default function Overview() {
   const [influencersList, setInfluencersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Sync date range in AppContext for consistency across views
-  useEffect(() => {
-    if (startDate && endDate && startDate <= endDate && setDateRange) {
-      setDateRange(`${formatDisplayDate(startDate)} – ${formatDisplayDate(endDate)}`);
-    }
-  }, [startDate, endDate, setDateRange]);
 
   useEffect(() => {
     if (!startDate || !endDate || startDate > endDate) {

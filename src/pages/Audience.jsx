@@ -20,9 +20,7 @@ function formatDisplayDate(dateStr) {
 }
 
 export default function Audience() {
-  const { platform, setPlatform, setDateRange } = useApp();
-  const [startDate, setStartDate] = useState('2022-12-31');
-  const [endDate, setEndDate] = useState('2023-05-15');
+  const { platform, setPlatform, startDate, setStartDate, endDate, setEndDate } = useApp();
 
   const [audienceData, setAudienceData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,12 +31,6 @@ export default function Audience() {
     : startDate > endDate
       ? 'From date cannot be after To date.'
       : null;
-
-  useEffect(() => {
-    if (startDate && endDate && startDate <= endDate && setDateRange) {
-      setDateRange(`${formatDisplayDate(startDate)} – ${formatDisplayDate(endDate)}`);
-    }
-  }, [startDate, endDate, setDateRange]);
 
   useEffect(() => {
     if (!startDate || !endDate || startDate > endDate) return;

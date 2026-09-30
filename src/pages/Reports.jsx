@@ -29,9 +29,7 @@ function buildRecommendations(overview, trends, alerts) {
 }
 
 export default function Reports() {
-  const { platform } = useApp();
-  const [startDate, setStartDate] = useState('2022-12-31');
-  const [endDate, setEndDate] = useState('2023-05-15');
+  const { platform, startDate, setStartDate, endDate, setEndDate } = useApp();
 
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);

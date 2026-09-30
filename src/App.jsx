@@ -21,10 +21,27 @@ export function useApp() {
 
 export default function App() {
   const [platform, setPlatform] = useState('all');
+  const [startDate, setStartDate] = useState('2022-12-31');
+  const [endDate, setEndDate] = useState('2023-05-15');
   const [dateRange, setDateRange] = useState('Dec 31, 2022 – May 15, 2023');
   const [analyzed, setAnalyzed] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sync dateRange display label when startDate or endDate changes
+  useEffect(() => {
+    if (startDate && endDate && startDate <= endDate) {
+      try {
+        const d1 = new Date(startDate + (startDate.length <= 10 ? 'T00:00:00' : ''));
+        const d2 = new Date(endDate + (endDate.length <= 10 ? 'T00:00:00' : ''));
+        const s1 = !isNaN(d1.getTime()) ? d1.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : startDate;
+        const s2 = !isNaN(d2.getTime()) ? d2.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : endDate;
+        setDateRange(`${s1} – ${s2}`);
+      } catch {
+        setDateRange(`${startDate} – ${endDate}`);
+      }
+    }
+  }, [startDate, endDate]);
 
   // ── Backend connection status ─────────────────────────────────
   const [backendStatus, setBackendStatus] = useState({
@@ -50,6 +67,8 @@ export default function App() {
   return (
     <AppContext.Provider value={{
       platform, setPlatform,
+      startDate, setStartDate,
+      endDate, setEndDate,
       dateRange, setDateRange,
       analyzed, setAnalyzed,
       analyzing, setAnalyzing,

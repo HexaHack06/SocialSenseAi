@@ -46,11 +46,7 @@ function CustomTooltip({ active, payload, label }) {
 // ── Main Component ────────────────────────────────────────────
 
 export default function Sentiment() {
-  const { platform, setPlatform, setDateRange } = useApp();
-
-  // ── Date range state (own, like Overview) ──────────────────
-  const [startDate, setStartDate] = useState('2022-12-31');
-  const [endDate, setEndDate] = useState('2023-05-15');
+  const { platform, setPlatform, startDate, setStartDate, endDate, setEndDate } = useApp();
 
   // ── API state ──────────────────────────────────────────────
   const [apiData, setApiData] = useState(null);
@@ -67,13 +63,6 @@ export default function Sentiment() {
     : startDate > endDate
       ? 'From date cannot be after To date.'
       : null;
-
-  // ── Sync AppContext dateRange string ───────────────────────
-  useEffect(() => {
-    if (startDate && endDate && startDate <= endDate && setDateRange) {
-      setDateRange(`${formatDisplayDate(startDate)} – ${formatDisplayDate(endDate)}`);
-    }
-  }, [startDate, endDate, setDateRange]);
 
   // ── Fetch from /api/overview ───────────────────────────────
   useEffect(() => {
